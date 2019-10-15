@@ -1,0 +1,61 @@
+<?php
+
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Cookie;
+use \Drupal\Core\Url;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
+/**
+ * Implements hook_ENTITY_TYPE_view() for node entities.
+ *
+ * @param array $build
+ * @param EntityInterface $entity
+ * @param EntityViewDisplayInterface $display
+ * @param type $view_mode
+ * @return type
+ */
+function article_with_disclaimer_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
+
+  if ('article_with_disclaimer' === $entity->getType() && 'full' === $view_mode) {
+    if (is_null($entity->get('field_disclaimer')->first())) {
+      return;
+    }
+    $accepted_disclaimers = [];
+    if (isset($_COOKIE['Drupal_visitor_accepted_articles'])) {
+      $accepted_disclaimers = json_decode($_COOKIE['Drupal_visitor_accepted_articles']);
+    }
+
+    if (!in_array($entity->id(), $accepted_disclaimers)) {
+
+      $disclaimer_id = $entity->get('field_disclaimer')->first()->getValue()['target_id'];
+
+       // Redirect to the disclaimer. Later we need to redirect back to the node.
+      $disclaimer_url = Url::fromRoute('entity.node.canonical', ['node' => $disclaimer_id, 'return' => $entity->id()])->toString();
+
+      $response = new RedirectResponse($disclaimer_url);
+      $response->send();
+    }
+  }
+  // Show disclaimer with buttons if return parameter persists.
+  if ('disclaimer_for_article' === $entity->getType() && 'full' === $view_mode) {
+    $query = \Drupal::request()->query;
+    $return = $query->get('return');
+    if ($return) {
+      $reject_url = Url::fromRoute('view.article_with_disclaimer.article_page');
+      $reject_url = $reject_url->toString();
+      $build['#theme'] = 'book-disclaimer';
+      $build['#return_url'] = Url::fromRoute('article_with_disclaimer.accept', ['node' => $return])->toString();
+      $build['#reject_url'] = $reject_url;
+    }
+  }
+}
+
+function article_with_disclaimer_theme() {
+  return [
+      'book-disclaimer' => [
+          'render element' => 'content'
+          ]
+  ];
+}

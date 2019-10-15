@@ -1,0 +1,8 @@
+article_with_disclaimer.accept:
+  path: '/accept/{node}' 
+  defaults: 
+    _controller: '\Drupal\article_with_disclaimer\Controller\DisclaimerController::accept' 
+    _title: 'Hello World'
+  requirements:
+    _permission: 'access content'
+    node: \d+

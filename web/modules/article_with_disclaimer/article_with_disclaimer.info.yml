@@ -1,0 +1,6 @@
+name: Article with disclaimer
+description: Article with disclaimer feture.
+package: article_with_disclaimer
+type: module
+version: 1.0
+core: 8.x
