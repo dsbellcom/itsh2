@@ -1,0 +1,26 @@
+status: true
+dependencies:
+  config:
+    - field.field.node.disclaimer_for_article.body
+    - node.type.disclaimer_for_article
+  module:
+    - text
+    - user
+id: node.disclaimer_for_article.default
+targetEntityType: node
+bundle: disclaimer_for_article
+mode: default
+content:
+  body:
+    label: hidden
+    type: text_default
+    weight: 101
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+  links:
+    weight: 100
+    settings: {  }
+    third_party_settings: {  }
+    region: content
+hidden: {  }
