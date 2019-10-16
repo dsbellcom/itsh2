@@ -8,16 +8,12 @@ use \Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Implements hook_ENTITY_TYPE_view() for node entities.
+ * Implements hook_ENTITY_TYPE_view().
  *
- * @param array $build
- * @param EntityInterface $entity
- * @param EntityViewDisplayInterface $display
- * @param type $view_mode
- * @return type
  */
 function article_with_disclaimer_node_view(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display, $view_mode) {
 
+  // Redirect to disclaimer accept route if disclaimer is not accepted.
   if ('article_with_disclaimer' === $entity->getType() && 'full' === $view_mode) {
     if (is_null($entity->get('field_disclaimer')->first())) {
       return;
@@ -28,12 +24,9 @@ function article_with_disclaimer_node_view(array &$build, EntityInterface $entit
     }
 
     if (!in_array($entity->id(), $accepted_disclaimers)) {
-
       $disclaimer_id = $entity->get('field_disclaimer')->first()->getValue()['target_id'];
-
-       // Redirect to the disclaimer. Later we need to redirect back to the node.
+      // Redirect to the disclaimer. Later we need to redirect back to the node.
       $disclaimer_url = Url::fromRoute('entity.node.canonical', ['node' => $disclaimer_id, 'return' => $entity->id()])->toString();
-
       $response = new RedirectResponse($disclaimer_url);
       $response->send();
     }
@@ -45,17 +38,16 @@ function article_with_disclaimer_node_view(array &$build, EntityInterface $entit
     if ($return) {
       $reject_url = Url::fromRoute('view.article_with_disclaimer.article_page');
       $reject_url = $reject_url->toString();
-      $build['#theme'] = 'book-disclaimer';
+      $build['#theme'] = 'disclaimer';
       $build['#return_url'] = Url::fromRoute('article_with_disclaimer.accept', ['node' => $return])->toString();
       $build['#reject_url'] = $reject_url;
     }
   }
 }
 
+/**
+ * Implements hook_theme().
+ */
 function article_with_disclaimer_theme() {
-  return [
-      'book-disclaimer' => [
-          'render element' => 'content'
-          ]
-  ];
+  return ['disclaimer' => ['render element' => 'content']];
 }
